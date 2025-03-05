@@ -1,1 +1,1 @@
-[点我查看更多精彩内容:www.flydean.com](www.flydean.com)
+[点我查看更多精彩内容](https://mp.weixin.qq.com/s/OAjpLzHyIE2FyKSNUrdMjA)
