@@ -1,5 +1,6 @@
 import os.path
 import traceback
+import time
 
 import selenium
 from selenium import webdriver
@@ -17,7 +18,7 @@ from publisher.zhihu_publisher import zhihu_publisher
 from publisher.jianshu_publisher import jianshu_publisher
 from publisher.juejin_publisher import juejin_publisher
 from publisher.mpweixin_publisher import mpweixin_publisher
-from utils.file_utils import list_all_files, list_files, write_to_file, read_head
+from utils.file_utils import list_all_files, list_files, write_to_file, read_head, read_file_lines
 from utils.yaml_file_utils import read_common
 
 last_published_file_name = 'last_published.txt'
@@ -63,6 +64,17 @@ all_sites = ['csdn',
              'toutiao',
              'mpweixin']
 
+def get_published_articles():
+    """获取已发布文章列表"""
+    try:
+        return set(read_file_lines(common_config['published_record_file']))
+    except:
+        return set()
+
+def mark_as_published(filename, platform):
+    """将文章标记为已发布"""
+    with open(common_config['published_record_file'], 'a') as f:
+        f.write(f"{filename}\t{platform}\t{time.strftime('%Y-%m-%d %H:%M:%S')}\n")
 
 def publish_to_platform(platform, driver, content=None):
     """
@@ -70,14 +82,15 @@ def publish_to_platform(platform, driver, content=None):
     """
     try:
         globals()[platform + '_publisher'](driver, content)  # 动态调用对应平台的发布函数
+        if content:
+            mark_as_published(os.path.basename(content), platform)
     except Exception as e:
         print(platform, "got error")
-        traceback.print_exc()  # 打印完整的异常跟踪信息
+        traceback.print_exc()
         print(e)
 
     if content:
         save_last_published_file_name(os.path.basename(content))
-
 
 def publish_to_all_platforms(driver, content=None):
     """
@@ -89,25 +102,32 @@ def publish_to_all_platforms(driver, content=None):
     # 在需要的时候关闭浏览器，不要关闭浏览器进程
     driver.quit()
 
-
 def save_last_published_file_name(filename):
     write_to_file(filename, last_published_file_name)
 
-
 if __name__ == '__main__':
     while True:
-        # 选择要发布的内容
         print("选择你要发布的博客,输入序号:")
-        # file_list = list_all_files(content_dir, ".md")
         file_list = list_files(content_dir, ".md")
-        for index, file_name in enumerate(file_list):
-            print(str(index) + ":" + os.path.basename(file_name))
-        print("上次发布的博客是: " + read_head(last_published_file_name))
+        published_articles = get_published_articles()
+        
+        # 过滤掉已发布的文章
+        unpublished_files = []
+        for file_name in file_list:
+            base_name = os.path.basename(file_name)
+            if base_name not in published_articles:
+                unpublished_files.append(file_name)
+        
+        # 只显示未发布的文章
+        for index, file_name in enumerate(unpublished_files):
+            print(f"{index}: {os.path.basename(file_name)}")
+            
+        print("\n上次发布的博客是: " + read_head(last_published_file_name))
         file_choice = input("\n请选择: ")
         print("")
 
-        if len(file_list) > int(file_choice) >= 0:
-            file_path = file_list[int(file_choice)]
+        if len(unpublished_files) > int(file_choice) >= 0:
+            file_path = unpublished_files[int(file_choice)]
             print("你要发布的文章是:", file_path)
             while True:
                 print("选择你要发布的平台:\n")

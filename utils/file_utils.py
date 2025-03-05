@@ -211,5 +211,13 @@ def download_image(url):
     except Exception as e:
         print(f"An error occurred: {e}")
 
+def read_file_lines(file_path):
+    """读取文件所有行"""
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            return [line.split('\t')[0].strip() for line in f.readlines()]
+    except FileNotFoundError:
+        return []
+
 if __name__ == "__main__":
     parse_front_matter("test.md")

@@ -31,6 +31,9 @@ wait_login: True
 # 等待login的时间 默认2分钟
 wait_login_time : 120
 
+# 发布记录文件路径
+published_record_file: /home/mao/workspace/medium_scrape/published_articles.txt
+
 enable:
   csdn: True
   jianshu: False
