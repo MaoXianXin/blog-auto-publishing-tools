@@ -189,6 +189,10 @@ def publish_to_csdn(content=None):
         # 在需要的时候关闭浏览器，不要关闭浏览器进程
         driver.quit()
 
+"""
+./chrome --remote-debugging-port=9222
+"""
+
 if __name__ == '__main__':
     common_config = read_common()
     content_dir = common_config['content_dir']
