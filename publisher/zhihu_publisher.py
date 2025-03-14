@@ -82,12 +82,49 @@ def zhihu_publisher(driver,content=None):
     # TODO
 
     # 文章话题
-    # TODO
+    try:
+        # 点击添加话题按钮
+        add_topic_button = driver.find_element(By.XPATH, '//button[contains(text(), "添加话题")]')
+        add_topic_button.click()
+        time.sleep(2)
+        
+        # 在搜索框中输入"人工智能"
+        topic_search_input = driver.find_element(By.XPATH, '//input[@placeholder="搜索话题..."]')
+        topic_search_input.send_keys("人工智能")
+        time.sleep(3)  # 增加等待时间，确保下拉菜单完全加载
+        
+        # 尝试多种方式选择下拉菜单中的第一个"人工智能"选项
+        try:
+            # 方法1: 尝试直接点击包含"人工智能"文本的按钮
+            topic_buttons = driver.find_elements(By.XPATH, '//button[contains(text(), "人工智能") and contains(@class, "css-gfrh4c")]')
+            if topic_buttons:
+                driver.execute_script("arguments[0].click();", topic_buttons[0])
+                print("成功选择话题：使用按钮文本方法")
+            else:
+                # 方法2: 尝试点击下拉菜单中的第一个选项
+                dropdown_options = driver.find_elements(By.XPATH, '//div[contains(@class, "Popover-content")]//button')
+                if dropdown_options:
+                    driver.execute_script("arguments[0].click();", dropdown_options[0])
+                    print("成功选择话题：使用下拉菜单第一项方法")
+                else:
+                    # 方法3: 如果上述方法都失败，尝试按回车键确认第一个选项
+                    topic_search_input.send_keys(Keys.RETURN)
+                    print("成功选择话题：使用回车键方法")
+        except Exception as inner_e:
+            print(f"选择话题选项失败: {str(inner_e)}")
+            # 备选方案：按回车键
+            topic_search_input.send_keys(Keys.RETURN)
+            print("使用回车键确认话题选择")
+            
+        time.sleep(2)
+    except Exception as e:
+        print(f"添加话题失败: {str(e)}")
 
     # 专栏收录
-    pubish_panel = driver.find_element(By.XPATH, '//label[@for="PublishPanel-columnLabel-1"]')
-    ActionChains(driver).click(pubish_panel).perform()
-    # pubish_panel.click()
+    # 选择"不发布到专栏"选项
+    no_column_option = driver.find_element(By.XPATH, '//label[@for="PublishPanel-columnLabel-0"]')
+    ActionChains(driver).click(no_column_option).perform()
+    time.sleep(1)  # 给点时间让选择生效
 
     # 确认发布
     if auto_publish:

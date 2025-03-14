@@ -41,7 +41,7 @@ enable:
   segmentfault: False
   oschina: False
   cnblogs: False
-  zhihu: False
+  zhihu: True
   cto51: False
   infoq: False
   toutiao: False
